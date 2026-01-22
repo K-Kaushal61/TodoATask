@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+*{
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #e5e7eb;
+}
+
+.taskdescription textarea{
+    scrollbar-width: none;
+}
