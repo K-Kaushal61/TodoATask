@@ -1,4 +1,4 @@
-import logo from "./todoatask-logo.png";
+import logo from "./KanBan-Logo.png";
 
 export const assets = {
     logo,
