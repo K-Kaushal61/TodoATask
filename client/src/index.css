@@ -11,3 +11,7 @@ body{
 .taskdescription textarea{
     scrollbar-width: none;
 }
+
+.task :hover{
+    
+}

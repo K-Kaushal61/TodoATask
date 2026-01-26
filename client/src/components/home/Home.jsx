@@ -1,49 +1,117 @@
-import React from 'react';
-import '../../index.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Check, X } from "lucide-react";
+import { toast } from "react-hot-toast";
+import Task from "../task/Task";
 
 const Home = () => {
+
+const [tasks, setTasks] = useState([]);
+const [heading, setHeading] = useState("");
+const [description, setDescription] = useState("");
+const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (heading.trim() === "" && description.trim() === "") {
+      setIsEditing(false);
+    } else {
+      setIsEditing(true);
+    }
+  }, [heading, description]);
+
+  const onSubmitHandler = async () => {
+    try {
+      const { data } = await axios.post(
+        "http://localhost:3000/api/task/create",
+        { heading, description }
+      );
+
+      const { task } = await axios.get()
+
+      if (data.success) {
+        toast.success("Task created");
+        setHeading("");
+        setDescription("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  const handleCancel = () => {
+    setHeading("");
+    setDescription("");
+  };
+
+  useEffect(() => {
+  const fetchTasks = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:3000/api/task/fetch"
+      );
+
+      if (data.success) {
+        setTasks(data.tasks);
+      }
+    } catch (error) {
+      toast.error("Failed to load tasks");
+    }
+  };
+
+  fetchTasks();
+}, []);
+
+
   return (
-    <div class='Main-div flex justify-around gap-6 p-5 h-full w-screen'>
-        <div class="todo-div bg-red-400 flex flex-col min-h-160 w-screen p-3 rounded-xl">
-            <h1 class='text-2xl font-semibold '>To-Do</h1>
-            <hr class='bg-black mt-1 mb-2'/>
-            <div class="todotask flex flex-col bg-black p-2 gap-2 rounded-xl h-50">
-                <div class='taskheading'>
-                    <input class=' text-white placeholder:text-gray-300 outline-0 w-full' maxlength={50} placeholder='Heading' type='text'/>
-                </div>
-                <div class='taskdescription flex flex-wrap'>
-                    <textarea wrap='soft' maxlength={120} rows={6} class='text-white resize-none placeholder:text-gray-300 outline-0 w-full ' placeholder='Description...'/>
-                </div>
+    <div className="Main-div flex justify-around gap-6 p-5 h-full w-screen">
+
+      <div className="todo-div bg-red-400 flex flex-col min-h-160 w-screen p-3 rounded-xl">
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-semibold">Todo</h1>
+
+          {isEditing && (
+            <div className="flex gap-2">
+              <Check
+                onClick={onSubmitHandler}
+                color="white"
+                className="cursor-pointer bg-green-500 rounded-2xl p-1"
+              />
+              <X
+                onClick={handleCancel}
+                color="white"
+                className="cursor-pointer bg-red-500 rounded-2xl p-1"
+              />
             </div>
+          )}
         </div>
 
-        <div class="todo-div bg-green-400 flex flex-col w-screen p-3 rounded-xl">
-            <h1 class='text-2xl font-semibold '>Ongoing</h1>
-            <hr class='bg-black mt-1 mb-2'/>
-            <div class="todotask flex flex-col bg-black p-2 gap-2 rounded-xl h-50">
-                <div class='taskheading'>
-                    <input class=' text-white placeholder:text-gray-300 outline-0 w-full' maxlength={50} placeholder='Heading' type='text'/>
-                </div>
-                <div class='taskdescription flex flex-wrap'>
-                    <textarea wrap='soft' maxlength={120} rows={6} class='text-white resize-none placeholder:text-gray-300 outline-0 w-full ' placeholder='Description...'/>
-                </div>
-            </div>
-        </div>
+        <hr className="bg-black mt-1 mb-2" />
 
-        <div class="todo-div bg-blue-400 flex flex-col w-screen p-3 rounded-xl">
-            <h1 class='text-2xl font-semibold '>Completed</h1>
-            <hr class='bg-black mt-1 mb-2'/>
-            <div class="todotask flex flex-col bg-black p-2 gap-2 rounded-xl h-50">
-                <div class='taskheading'>
-                    <input class=' text-white placeholder:text-gray-300 outline-0 w-full' maxlength={50} placeholder='Heading' type='text'/>
-                </div>
-                <div class='taskdescription flex flex-wrap'>
-                    <textarea wrap='soft' maxlength={120} rows={6} class='text-white resize-none placeholder:text-gray-300 outline-0 w-full ' placeholder='Description...'/>
-                </div>
-            </div>
-        </div>
+        {tasks.length === 0 && (
+    <p className="text-sm text-gray-700">
+      No tasks yet
+    </p>
+  )}
+
+  {tasks.map(task => (
+    <Task key={task._id} task={task} />
+  ))}
+
+      </div>
+
+      <div className="todo-div bg-green-400 flex flex-col w-screen p-3 rounded-xl">
+        <h1 className="text-2xl font-semibold">Ongoing</h1>
+        <hr className="bg-black mt-1 mb-2" />
+      </div>
+
+      <div className="todo-div bg-blue-400 flex flex-col w-screen p-3 rounded-xl">
+        <h1 className="text-2xl font-semibold">Completed</h1>
+        <hr className="bg-black mt-1 mb-2" />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
